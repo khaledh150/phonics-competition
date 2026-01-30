@@ -106,6 +106,7 @@ const speakWord = (word) => {
 
   const utterance = new SpeechSynthesisUtterance(word);
   utterance.voice = voice;
+  utterance.lang = 'en-US'; // Force English dictation
   utterance.rate = COMPETITION_SPEECH_RATE; // 0.85 rate matching competition
   utterance.pitch = 1;
   utterance.volume = 1;

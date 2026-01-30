@@ -328,6 +328,7 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
     // First: speak the question number
     const numberUtterance = new SpeechSynthesisUtterance(String(questionNumber));
     numberUtterance.voice = voiceRef.current;
+    numberUtterance.lang = 'en-US'; // Force English dictation
     numberUtterance.rate = 1.0; // Normal rate for number
     numberUtterance.pitch = 1;
     numberUtterance.volume = 1;
@@ -338,6 +339,7 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
         // Then: speak the word at slower rate for clarity
         const wordUtterance = new SpeechSynthesisUtterance(word);
         wordUtterance.voice = voiceRef.current;
+        wordUtterance.lang = 'en-US'; // Force English dictation
         wordUtterance.rate = COMPETITION_SPEECH_RATE; // 0.85 rate for clarity
         wordUtterance.pitch = 1;
         wordUtterance.volume = 1;
@@ -378,6 +380,7 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = voiceRef.current;
+    utterance.lang = 'en-US'; // Force English dictation
     utterance.rate = settings.speed;
     utterance.pitch = 1;
     utterance.volume = 1;
@@ -718,21 +721,21 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
           </button>
         </div>
 
-        {/* Top Bar - Fixed Height */}
-        <div className="shrink-0 p-4 md:p-6">
+        {/* Top Bar - Fixed Height, compact on phones */}
+        <div className="shrink-0 p-2 md:p-6">
           <div className="flex flex-col max-w-lg">
-            {/* Question Counter & Mode - LARGER FONT */}
-            <div className="flex items-center gap-4 mb-2">
-              <span className="text-3xl font-bold text-[#3e366b]">
+            {/* Question Counter & Mode */}
+            <div className="flex items-center gap-2 md:gap-4 mb-1 md:mb-2">
+              <span className="text-lg md:text-3xl font-bold text-[#3e366b]">
                 Q{currentIndex + 1} / {gameQuestions.length}
               </span>
-              <span className="text-xl text-gray-500">
+              <span className="text-sm md:text-xl text-gray-500">
                 {isCompetition ? `Set ${settings.setLetter}` : 'Practice'}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden mb-2">
+            <div className="h-2 md:h-3 bg-gray-200 rounded-full overflow-hidden mb-1 md:mb-2">
               <div
                 className="h-full rounded-full transition-all duration-100"
                 style={{
@@ -742,14 +745,14 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
               />
             </div>
 
-            {/* Timer - Competition Only - LARGE - Pulses red at last 10 seconds */}
+            {/* Timer - Competition Only - Pulses red at last 10 seconds */}
             {isCompetition && (
-              <div className={`flex items-center gap-2 px-6 py-3 rounded-full w-fit transition-colors ${
+              <div className={`flex items-center gap-2 px-3 py-1 md:px-6 md:py-3 rounded-full w-fit transition-colors ${
                 totalTimeRemaining <= 10
                   ? 'bg-red-500 animate-pulse'
                   : 'bg-[#ffd700]'
               }`}>
-                <span className={`text-4xl font-bold ${
+                <span className={`text-xl md:text-4xl font-bold ${
                   totalTimeRemaining <= 10 ? 'text-white animate-pulse' : 'text-[#3e366b]'
                 }`}>
                   {formatTime(totalTimeRemaining)}
@@ -760,14 +763,15 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
         </div>
 
         {/* Main Content - FIXED HEIGHT FLEX CONTAINER - Raised up with pt-0 and justify-start */}
-        <div className="flex-1 flex flex-col items-center justify-start pt-4 min-h-0">
+        <div className="flex-1 flex flex-col items-center justify-start pt-1 md:pt-4 min-h-0">
 
-          {/* Speaker Icon Container - FIXED HEIGHT (doesn't push cards) */}
-          <div className="h-[140px] flex items-center justify-center shrink-0">
+          {/* Speaker Icon Container - Compact on phones, full size on desktop */}
+          <div className="h-[60px] md:h-[140px] flex items-center justify-center shrink-0">
             {isCompetition ? (
-              <div className={`p-8 rounded-full bg-white/50 ${isSpeaking ? 'speaker-pulse' : ''}`}>
+              <div className={`p-3 md:p-8 rounded-full bg-white/50 ${isSpeaking ? 'speaker-pulse' : ''}`}>
                 <Volume2
-                  style={{ color: '#ae90fd', width: '100px', height: '100px' }}
+                  className="w-10 h-10 md:w-[100px] md:h-[100px]"
+                  style={{ color: '#ae90fd' }}
                   strokeWidth={1.5}
                 />
               </div>
@@ -775,31 +779,33 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
               <button
                 onClick={handleReplay}
                 disabled={isSpeaking}
-                className={`p-8 rounded-full bg-white/50 hover:bg-white/80 transition-all ${
+                className={`p-3 md:p-8 rounded-full bg-white/50 hover:bg-white/80 transition-all ${
                   isSpeaking ? 'speaker-pulse' : ''
                 }`}
               >
                 <Volume2
-                  style={{ color: '#ae90fd', width: '80px', height: '80px' }}
+                  className="w-8 h-8 md:w-[80px] md:h-[80px]"
+                  style={{ color: '#ae90fd' }}
                   strokeWidth={1.5}
                 />
               </button>
             )}
           </div>
 
-          {/* Instruction Text - Fixed Height */}
-          <div className="h-[36px] flex items-center justify-center shrink-0 mb-2">
+          {/* Instruction Text - Compact on phones */}
+          <div className="h-[20px] md:h-[36px] flex items-center justify-center shrink-0 mb-1 md:mb-2">
             {!isCompetition && (
-              <p className="text-2xl text-gray-500">
+              <p className="text-sm md:text-2xl text-gray-500">
                 {isSpeaking ? 'Listen carefully...' : 'Tap the correct word!'}
               </p>
             )}
           </div>
 
           {/* Choice Cards - LOCKED IN CENTER, NO LAYOUT SHIFT */}
-          <div className="grid grid-cols-3 gap-4 md:gap-8 w-full max-w-6xl px-4 shrink-0">
+          {/* Always 3 columns, compact on phones, full size on desktop */}
+          <div className="grid grid-cols-3 gap-2 md:gap-8 w-full max-w-6xl px-2 md:px-4 shrink-0">
             {currentQuestion.choices.map((choice, index) => {
-              let cardClass = 'rounded-[2.7rem] shadow-lg transition-colors aspect-square';
+              let cardClass = 'rounded-xl md:rounded-[2.7rem] shadow-lg transition-colors aspect-square';
 
               if (!isCompetition) {
                 cardClass += ' cursor-pointer hover:scale-105 transition-transform';
@@ -818,10 +824,10 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
                   key={index}
                   onClick={() => !isCompetition && handleAnswer(index)}
                   disabled={isCompetition || !canAnswer || feedback}
-                  className={`${cardClass} flex items-center justify-center p-4`}
+                  className={`${cardClass} flex items-center justify-center p-2 md:p-4`}
                   style={{ background: 'linear-gradient(150deg, #f0f7ff 65%, #e6f0ff 100%)' }}
                 >
-                  <span className="text-[10vh] font-bold text-gray-700 text-center leading-none">
+                  <span className="text-3xl md:text-[10vh] font-bold text-gray-700 text-center leading-none">
                     {choice}
                   </span>
                 </button>
