@@ -721,21 +721,21 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
           </button>
         </div>
 
-        {/* Top Bar - Fixed Height, compact on phones */}
-        <div className="shrink-0 p-2 md:p-6">
-          <div className="flex flex-col max-w-lg">
+        {/* Top Bar - Portrait: normal, Landscape: compact, Desktop: full */}
+        <div className="shrink-0 p-3 landscape:p-1 lg:p-6">
+          <div className="flex flex-col max-w-[50%] landscape:max-w-[40%] lg:max-w-lg">
             {/* Question Counter & Mode */}
-            <div className="flex items-center gap-2 md:gap-4 mb-1 md:mb-2">
-              <span className="text-lg md:text-3xl font-bold text-[#3e366b]">
+            <div className="flex items-center gap-3 landscape:gap-2 lg:gap-4 mb-1 landscape:mb-0 lg:mb-2">
+              <span className="text-2xl landscape:text-base lg:text-3xl font-bold text-[#3e366b]">
                 Q{currentIndex + 1} / {gameQuestions.length}
               </span>
-              <span className="text-sm md:text-xl text-gray-500">
+              <span className="text-base landscape:text-sm lg:text-xl text-gray-500">
                 {isCompetition ? `Set ${settings.setLetter}` : 'Practice'}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-2 md:h-3 bg-gray-200 rounded-full overflow-hidden mb-1 md:mb-2">
+            <div className="h-2 landscape:h-1.5 lg:h-3 bg-gray-200 rounded-full overflow-hidden mb-1 landscape:mb-0 lg:mb-2">
               <div
                 className="h-full rounded-full transition-all duration-100"
                 style={{
@@ -747,12 +747,12 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
 
             {/* Timer - Competition Only - Pulses red at last 10 seconds */}
             {isCompetition && (
-              <div className={`flex items-center gap-2 px-3 py-1 md:px-6 md:py-3 rounded-full w-fit transition-colors ${
+              <div className={`flex items-center gap-2 px-4 py-1.5 landscape:px-2 landscape:py-0.5 lg:px-6 lg:py-3 rounded-full w-fit transition-colors ${
                 totalTimeRemaining <= 10
                   ? 'bg-red-500 animate-pulse'
                   : 'bg-[#ffd700]'
               }`}>
-                <span className={`text-xl md:text-4xl font-bold ${
+                <span className={`text-2xl landscape:text-lg lg:text-4xl font-bold ${
                   totalTimeRemaining <= 10 ? 'text-white animate-pulse' : 'text-[#3e366b]'
                 }`}>
                   {formatTime(totalTimeRemaining)}
@@ -762,15 +762,15 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
           </div>
         </div>
 
-        {/* Main Content - FIXED HEIGHT FLEX CONTAINER - Raised up with pt-0 and justify-start */}
-        <div className="flex-1 flex flex-col items-center justify-start pt-1 md:pt-4 min-h-0">
+        {/* Main Content - Portrait: centered with space, Landscape: compact top, Desktop: full */}
+        <div className="flex-1 flex flex-col items-center justify-center landscape:justify-start lg:justify-start pt-0 landscape:pt-1 lg:pt-4 min-h-0">
 
-          {/* Speaker Icon Container - Compact on phones, full size on desktop */}
-          <div className="h-[60px] md:h-[140px] flex items-center justify-center shrink-0">
+          {/* Speaker Icon Container - Portrait: bigger/lower, Landscape: small/top, Desktop: full */}
+          <div className="h-[100px] landscape:h-[50px] lg:h-[140px] flex items-center justify-center shrink-0 mb-4 landscape:mb-1 lg:mb-0">
             {isCompetition ? (
-              <div className={`p-3 md:p-8 rounded-full bg-white/50 ${isSpeaking ? 'speaker-pulse' : ''}`}>
+              <div className={`p-5 landscape:p-2 lg:p-8 rounded-full bg-white/50 ${isSpeaking ? 'speaker-pulse' : ''}`}>
                 <Volume2
-                  className="w-10 h-10 md:w-[100px] md:h-[100px]"
+                  className="w-14 h-14 landscape:w-8 landscape:h-8 lg:w-[100px] lg:h-[100px]"
                   style={{ color: '#ae90fd' }}
                   strokeWidth={1.5}
                 />
@@ -779,12 +779,12 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
               <button
                 onClick={handleReplay}
                 disabled={isSpeaking}
-                className={`p-3 md:p-8 rounded-full bg-white/50 hover:bg-white/80 transition-all ${
+                className={`p-5 landscape:p-2 lg:p-8 rounded-full bg-white/50 hover:bg-white/80 transition-all ${
                   isSpeaking ? 'speaker-pulse' : ''
                 }`}
               >
                 <Volume2
-                  className="w-8 h-8 md:w-[80px] md:h-[80px]"
+                  className="w-12 h-12 landscape:w-7 landscape:h-7 lg:w-[80px] lg:h-[80px]"
                   style={{ color: '#ae90fd' }}
                   strokeWidth={1.5}
                 />
@@ -792,20 +792,20 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
             )}
           </div>
 
-          {/* Instruction Text - Compact on phones */}
-          <div className="h-[20px] md:h-[36px] flex items-center justify-center shrink-0 mb-1 md:mb-2">
+          {/* Instruction Text - Portrait: visible, Landscape: small, Desktop: full */}
+          <div className="h-[28px] landscape:h-[18px] lg:h-[36px] flex items-center justify-center shrink-0 mb-4 landscape:mb-1 lg:mb-2">
             {!isCompetition && (
-              <p className="text-sm md:text-2xl text-gray-500">
+              <p className="text-lg landscape:text-xs lg:text-2xl text-gray-500">
                 {isSpeaking ? 'Listen carefully...' : 'Tap the correct word!'}
               </p>
             )}
           </div>
 
-          {/* Choice Cards - LOCKED IN CENTER, NO LAYOUT SHIFT */}
-          {/* Always 3 columns, compact on phones, full size on desktop */}
-          <div className="grid grid-cols-3 gap-2 md:gap-8 w-full max-w-6xl px-2 md:px-4 shrink-0">
+          {/* Choice Cards - Always 3 columns */}
+          {/* Portrait: moderate size centered, Landscape: compact, Desktop: full size */}
+          <div className="grid grid-cols-3 gap-3 landscape:gap-2 lg:gap-8 w-full max-w-md landscape:max-w-2xl lg:max-w-6xl px-4 landscape:px-2 lg:px-4 shrink-0">
             {currentQuestion.choices.map((choice, index) => {
-              let cardClass = 'rounded-xl md:rounded-[2.7rem] shadow-lg transition-colors aspect-square';
+              let cardClass = 'rounded-2xl landscape:rounded-xl lg:rounded-[2.7rem] shadow-lg transition-colors aspect-square';
 
               if (!isCompetition) {
                 cardClass += ' cursor-pointer hover:scale-105 transition-transform';
@@ -824,10 +824,10 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
                   key={index}
                   onClick={() => !isCompetition && handleAnswer(index)}
                   disabled={isCompetition || !canAnswer || feedback}
-                  className={`${cardClass} flex items-center justify-center p-2 md:p-4`}
+                  className={`${cardClass} flex items-center justify-center p-3 landscape:p-1 lg:p-4`}
                   style={{ background: 'linear-gradient(150deg, #f0f7ff 65%, #e6f0ff 100%)' }}
                 >
-                  <span className="text-3xl md:text-[10vh] font-bold text-gray-700 text-center leading-none">
+                  <span className="text-4xl landscape:text-2xl lg:text-[10vh] font-bold text-gray-700 text-center leading-none">
                     {choice}
                   </span>
                 </button>
