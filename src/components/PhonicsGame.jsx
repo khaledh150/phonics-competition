@@ -10,11 +10,25 @@ import {
 
 // ============================================
 // WEB AUDIO API SOUND EFFECTS
+// Shared AudioContext to avoid browser limits
 // ============================================
+
+let sharedAudioContext = null;
+
+const getAudioContext = () => {
+  if (!sharedAudioContext || sharedAudioContext.state === 'closed') {
+    sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Resume if suspended (browser autoplay policy)
+  if (sharedAudioContext.state === 'suspended') {
+    sharedAudioContext.resume();
+  }
+  return sharedAudioContext;
+};
 
 const playStartBuzz = () => {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = getAudioContext();
     const oscillator1 = audioContext.createOscillator();
     const oscillator2 = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -42,7 +56,7 @@ const playStartBuzz = () => {
 
 const playClick = () => {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -64,7 +78,7 @@ const playClick = () => {
 
 const playCorrect = () => {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -87,7 +101,7 @@ const playCorrect = () => {
 
 const playIncorrect = () => {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -172,7 +186,17 @@ const selectUniqueTargets = (pool, count) => {
     if (selected.length >= count) break;
     if (!usedWords.has(item.sound)) {
       usedWords.add(item.sound);
-      selected.push(item);
+
+      // Shuffle the choices and update correctIndex so answer isn't always in same position
+      const correctWord = item.sound;
+      const shuffledChoices = shuffleArray([...item.choices]);
+      const newCorrectIndex = shuffledChoices.indexOf(correctWord);
+
+      selected.push({
+        ...item,
+        choices: shuffledChoices,
+        correctIndex: newCorrectIndex,
+      });
     }
   }
 
@@ -649,38 +673,38 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
   // ============================================
   if (phase === 'competitionFinished') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#d8e9fa]">
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
+      <div className="min-h-screen flex items-center justify-center bg-[#d8e9fa] p-2">
+        <div className="fixed top-2 right-2 landscape:top-1 landscape:right-1 md:top-3 md:right-3 lg:top-4 lg:right-4 z-50 flex gap-2">
           <button
             onClick={toggleFullscreen}
-            className="p-3 rounded-full bg-[#b4d7ff] hover:bg-[#9fc9ff] transition-all shadow-lg"
+            className="p-2 md:p-3 lg:p-3 rounded-full bg-[#b4d7ff] hover:bg-[#9fc9ff] transition-all shadow-lg"
             title="Toggle Fullscreen"
           >
-            <Maximize size={24} className="text-[#3e366b]" />
+            <Maximize className="w-5 h-5 md:w-6 md:h-6 lg:w-6 lg:h-6 text-[#3e366b]" />
           </button>
         </div>
 
         <div
-          className="text-center p-12 rounded-[2.7rem] shadow-xl max-w-2xl mx-4"
+          className="text-center p-6 landscape:p-4 landscape:py-3 md:p-10 md:landscape:p-6 lg:p-12 rounded-2xl landscape:rounded-xl md:rounded-3xl lg:rounded-[2.7rem] shadow-xl max-w-2xl mx-2 md:mx-4 lg:mx-4"
           style={{ background: 'linear-gradient(150deg, #f0f7ff 65%, #e6f0ff 100%)' }}
         >
-          <div className="text-8xl mb-6">🏆</div>
-          <h1 className="text-5xl md:text-6xl font-bold text-[#3e366b] mb-4">
+          <div className="text-5xl landscape:text-3xl md:text-7xl md:landscape:text-5xl lg:text-8xl mb-3 landscape:mb-1 md:mb-5 lg:mb-6">🏆</div>
+          <h1 className="text-3xl landscape:text-2xl md:text-5xl md:landscape:text-3xl lg:text-6xl font-bold text-[#3e366b] mb-2 landscape:mb-1 md:mb-3 lg:mb-4">
             Time's Up!
           </h1>
-          <p className="text-2xl text-gray-500 mb-4">
+          <p className="text-lg landscape:text-base md:text-2xl md:landscape:text-xl lg:text-2xl text-gray-500 mb-2 landscape:mb-1 md:mb-3 lg:mb-4">
             Set {settings.setLetter} Complete
           </p>
-          <p className="text-xl text-[#4d79ff] font-bold mb-8">
+          <p className="text-base landscape:text-sm md:text-xl md:landscape:text-lg lg:text-xl text-[#4d79ff] font-bold mb-4 landscape:mb-2 md:mb-6 lg:mb-8">
             {resultsRef.current.length} questions played
           </p>
-          <p className="text-lg text-gray-400 mb-10">
+          <p className="text-sm landscape:text-xs md:text-lg md:landscape:text-base lg:text-lg text-gray-400 mb-4 landscape:mb-2 md:mb-8 lg:mb-10">
             Students can now check their answer sheets
           </p>
 
           <button
             onClick={handleShowAnswerKey}
-            className="px-12 py-5 text-2xl font-bold bg-[#4d79ff] text-white rounded-full hover:bg-[#3d69ef] transition-all shadow-lg"
+            className="px-8 landscape:px-6 md:px-10 md:landscape:px-8 lg:px-12 py-3 landscape:py-2 md:py-4 md:landscape:py-3 lg:py-5 text-lg landscape:text-base md:text-xl md:landscape:text-lg lg:text-2xl font-bold bg-[#4d79ff] text-white rounded-full hover:bg-[#3d69ef] transition-all shadow-lg"
           >
             Show Answers
           </button>
@@ -721,21 +745,21 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
           </button>
         </div>
 
-        {/* Top Bar - Portrait: normal, Landscape: compact, Desktop: full */}
-        <div className="shrink-0 p-3 landscape:p-1 lg:p-6">
-          <div className="flex flex-col max-w-[50%] landscape:max-w-[40%] lg:max-w-lg">
+        {/* Top Bar - Phone: normal, Phone Landscape: compact, Tablet: bigger, Desktop: full */}
+        <div className="shrink-0 p-3 landscape:p-1 landscape:px-2 md:p-4 md:landscape:p-2 md:landscape:px-3 lg:p-6">
+          <div className="flex flex-col max-w-[50%] landscape:max-w-[45%] md:max-w-[50%] lg:max-w-lg">
             {/* Question Counter & Mode */}
-            <div className="flex items-center gap-3 landscape:gap-2 lg:gap-4 mb-1 landscape:mb-0 lg:mb-2">
-              <span className="text-2xl landscape:text-base lg:text-3xl font-bold text-[#3e366b]">
+            <div className="flex items-center gap-3 landscape:gap-2 md:gap-4 lg:gap-4 mb-1 landscape:mb-0.5 md:mb-2 lg:mb-2">
+              <span className="text-2xl landscape:text-xl md:text-3xl md:landscape:text-2xl lg:text-3xl font-bold text-[#3e366b]">
                 Q{currentIndex + 1} / {gameQuestions.length}
               </span>
-              <span className="text-base landscape:text-sm lg:text-xl text-gray-500">
+              <span className="text-base landscape:text-base md:text-xl md:landscape:text-lg lg:text-xl text-gray-500">
                 {isCompetition ? `Set ${settings.setLetter}` : 'Practice'}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-2 landscape:h-1.5 lg:h-3 bg-gray-200 rounded-full overflow-hidden mb-1 landscape:mb-0 lg:mb-2">
+            <div className="h-2 landscape:h-1.5 md:h-3 md:landscape:h-2 lg:h-3 bg-gray-200 rounded-full overflow-hidden mb-1 landscape:mb-0 md:mb-2 md:landscape:mb-1 lg:mb-2">
               <div
                 className="h-full rounded-full transition-all duration-100"
                 style={{
@@ -747,12 +771,12 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
 
             {/* Timer - Competition Only - Pulses red at last 10 seconds */}
             {isCompetition && (
-              <div className={`flex items-center gap-2 px-4 py-1.5 landscape:px-2 landscape:py-0.5 lg:px-6 lg:py-3 rounded-full w-fit transition-colors ${
+              <div className={`flex items-center gap-2 px-4 py-1.5 landscape:px-3 landscape:py-1 landscape:mt-1 md:px-5 md:py-2 md:landscape:px-4 md:landscape:py-1.5 md:landscape:mt-1 lg:px-6 lg:py-3 rounded-full w-fit transition-colors ${
                 totalTimeRemaining <= 10
                   ? 'bg-red-500 animate-pulse'
                   : 'bg-[#ffd700]'
               }`}>
-                <span className={`text-2xl landscape:text-lg lg:text-4xl font-bold ${
+                <span className={`text-2xl landscape:text-xl md:text-3xl md:landscape:text-2xl lg:text-4xl font-bold ${
                   totalTimeRemaining <= 10 ? 'text-white animate-pulse' : 'text-[#3e366b]'
                 }`}>
                   {formatTime(totalTimeRemaining)}
@@ -762,15 +786,15 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
           </div>
         </div>
 
-        {/* Main Content - Portrait: centered with space, Landscape: compact top, Desktop: full */}
-        <div className="flex-1 flex flex-col items-center justify-center landscape:justify-start lg:justify-start pt-0 landscape:pt-1 lg:pt-4 min-h-0">
+        {/* Main Content - Phone: centered, Phone Landscape: top, Tablet: centered bigger, Desktop: full */}
+        <div className="flex-1 flex flex-col items-center justify-center landscape:justify-start md:justify-center md:landscape:justify-start lg:justify-start pt-0 landscape:pt-0 md:pt-2 lg:pt-4 min-h-0">
 
-          {/* Speaker Icon Container - Portrait: bigger/lower, Landscape: small/top, Desktop: full */}
-          <div className="h-[100px] landscape:h-[50px] lg:h-[140px] flex items-center justify-center shrink-0 mb-4 landscape:mb-1 lg:mb-0">
+          {/* Speaker Icon Container */}
+          <div className="h-[120px] landscape:h-[45px] md:h-[160px] md:landscape:h-[70px] lg:h-[140px] flex items-center justify-center shrink-0 mb-2 landscape:mb-0 md:mb-4 md:landscape:mb-1 lg:mb-0">
             {isCompetition ? (
-              <div className={`p-5 landscape:p-2 lg:p-8 rounded-full bg-white/50 ${isSpeaking ? 'speaker-pulse' : ''}`}>
+              <div className={`p-4 landscape:p-1.5 md:p-6 md:landscape:p-3 lg:p-8 rounded-full bg-white/50 ${isSpeaking ? 'speaker-pulse' : ''}`}>
                 <Volume2
-                  className="w-14 h-14 landscape:w-8 landscape:h-8 lg:w-[100px] lg:h-[100px]"
+                  className="w-16 h-16 landscape:w-9 landscape:h-9 md:w-20 md:h-20 md:landscape:w-12 md:landscape:h-12 lg:w-[100px] lg:h-[100px]"
                   style={{ color: '#ae90fd' }}
                   strokeWidth={1.5}
                 />
@@ -779,12 +803,12 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
               <button
                 onClick={handleReplay}
                 disabled={isSpeaking}
-                className={`p-5 landscape:p-2 lg:p-8 rounded-full bg-white/50 hover:bg-white/80 transition-all ${
+                className={`p-4 landscape:p-1.5 md:p-6 md:landscape:p-3 lg:p-8 rounded-full bg-white/50 hover:bg-white/80 transition-all ${
                   isSpeaking ? 'speaker-pulse' : ''
                 }`}
               >
                 <Volume2
-                  className="w-12 h-12 landscape:w-7 landscape:h-7 lg:w-[80px] lg:h-[80px]"
+                  className="w-14 h-14 landscape:w-8 landscape:h-8 md:w-16 md:h-16 md:landscape:w-10 md:landscape:h-10 lg:w-[80px] lg:h-[80px]"
                   style={{ color: '#ae90fd' }}
                   strokeWidth={1.5}
                 />
@@ -792,20 +816,19 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
             )}
           </div>
 
-          {/* Instruction Text - Portrait: visible, Landscape: small, Desktop: full */}
-          <div className="h-[28px] landscape:h-[18px] lg:h-[36px] flex items-center justify-center shrink-0 mb-4 landscape:mb-1 lg:mb-2">
+          {/* Instruction Text */}
+          <div className="h-[28px] landscape:h-[14px] md:h-[40px] md:landscape:h-[24px] lg:h-[36px] flex items-center justify-center shrink-0 mb-2 landscape:mb-0 md:mb-4 md:landscape:mb-1 lg:mb-2">
             {!isCompetition && (
-              <p className="text-lg landscape:text-xs lg:text-2xl text-gray-500">
+              <p className="text-lg landscape:text-[10px] md:text-2xl md:landscape:text-base lg:text-2xl text-gray-500">
                 {isSpeaking ? 'Listen carefully...' : 'Tap the correct word!'}
               </p>
             )}
           </div>
 
           {/* Choice Cards - Always 3 columns */}
-          {/* Portrait: moderate size centered, Landscape: compact, Desktop: full size */}
-          <div className="grid grid-cols-3 gap-3 landscape:gap-2 lg:gap-8 w-full max-w-md landscape:max-w-2xl lg:max-w-6xl px-4 landscape:px-2 lg:px-4 shrink-0">
+          <div className="grid grid-cols-3 gap-3 landscape:gap-2 md:gap-5 md:landscape:gap-3 lg:gap-8 w-full max-w-sm landscape:max-w-3xl md:max-w-2xl md:landscape:max-w-4xl lg:max-w-6xl px-4 landscape:px-3 md:px-6 lg:px-4 shrink-0">
             {currentQuestion.choices.map((choice, index) => {
-              let cardClass = 'rounded-2xl landscape:rounded-xl lg:rounded-[2.7rem] shadow-lg transition-colors aspect-square';
+              let cardClass = 'rounded-2xl landscape:rounded-xl md:rounded-3xl md:landscape:rounded-2xl lg:rounded-[2.7rem] shadow-lg transition-colors aspect-square';
 
               if (!isCompetition) {
                 cardClass += ' cursor-pointer hover:scale-105 transition-transform';
@@ -824,10 +847,10 @@ const PhonicsGame = ({ settings, onFinish, onExit }) => {
                   key={index}
                   onClick={() => !isCompetition && handleAnswer(index)}
                   disabled={isCompetition || !canAnswer || feedback}
-                  className={`${cardClass} flex items-center justify-center p-3 landscape:p-1 lg:p-4`}
+                  className={`${cardClass} flex items-center justify-center p-3 landscape:p-1 md:p-4 md:landscape:p-2 lg:p-4`}
                   style={{ background: 'linear-gradient(150deg, #f0f7ff 65%, #e6f0ff 100%)' }}
                 >
-                  <span className="text-4xl landscape:text-2xl lg:text-[10vh] font-bold text-gray-700 text-center leading-none">
+                  <span className="text-4xl landscape:text-4xl md:text-6xl md:landscape:text-5xl lg:text-[10vh] font-bold text-gray-700 text-center leading-none">
                     {choice}
                   </span>
                 </button>
